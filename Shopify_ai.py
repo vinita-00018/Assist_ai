@@ -13,10 +13,12 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-st.set_page_config(page_title="🛍️ Agentic AI for Shopify – Built by Rishabh Shah", layout="wide")
-st.title("🛍️ Agentic AI for Shopify – Built by Rishabh Shah")
+# st.set_page_config(page_title="🛍️ Agentic AI for Shopify – Built by Rishabh Shah", layout="wide")
+# st.title("🛍️ Agentic AI for Shopify – Built by Rishabh Shah")
+st.set_page_config(page_title="🛍️", layout="wide")
+st.title("🛍️")
 
-tab1, tab2 ,tab3= st.tabs(["📊 Analytics With Code","🧠 AI Agent Chat","🗣️ Ask Anything (AI)"])
+tab1, tab2 ,tab3,tab4= st.tabs(["📊 Analytics With Code","🧠 AI Agent Chat","🗣️ Ask Anything (AI)","📈Prediction"])
 
 with tab1:
     # Your current chat code here
@@ -552,3 +554,151 @@ with tab3:
 
     st.text_input("🙋You:", key="input_text_tab3", placeholder="Ask anything (AI-powered)")
     st.button("Send", key="send_btn_tab3", on_click=handle_send_tab3)
+     
+with tab4:
+    # === Session State Init ===
+    if "chat_history_tab4" not in st.session_state:
+        st.session_state.chat_history_tab4 = []
+    if "input_text_tab4" not in st.session_state:
+        st.session_state.input_text_tab4 = ""
+    if "api_call_tab4" not in st.session_state:
+        st.session_state.api_call_tab4 = 1
+    if "shop_tab4" not in st.session_state:
+        st.session_state.shop_tab4 = ""
+    if "token_tab4" not in st.session_state:
+        st.session_state.token_tab4 = ""
+
+    def handle_send_tab4():
+        user_query = st.session_state.input_text_tab4.strip()
+        if not user_query:
+            return
+        if not st.session_state.shop_tab4 or not st.session_state.token_tab4:
+            st.session_state.chat_history_tab4.append({
+                "sender": "🤖AI Bot",
+                "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
+            })
+            return
+        if not st.session_state.shop_tab4.endswith(".myshopify.com"):
+            st.session_state.shop_tab4 += ".myshopify.com"
+
+        st.session_state.chat_history_tab4.append({"sender": "🙋You", "content": user_query})
+        time.sleep(5)
+      
+        question = f"""SHOP = os.getenv("SHOP", "{st.session_state.shop_tab4}")
+        ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "{st.session_state.token_tab4}") You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
+        url = "https://api.indiaagi.ai/test/sse"
+        params = {
+            "question": question,
+            "rounds": 1,
+            "model": "OpenAI"
+        }
+        clean_code = ""
+        try:
+            with requests.get(url, params=params, stream=True, verify=False) as response:
+                response.raise_for_status()
+                buffer = {}
+                for line in response.iter_lines(decode_unicode=True):
+                    if not line:
+                        if buffer.get("id") == "2":
+                            data_json = buffer.get("data")
+                            if data_json:
+                                data_obj = json.loads(data_json)
+                                code = data_obj.get("response")
+                                code = re.sub(r"^```python\\n|\\n```$", "", code.strip())
+                                code = code.encode('utf-8').decode('utf-8-sig')
+                                code = code.replace("\\n", "\n")
+                                code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab4}"', code)
+                                code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab4}"', code)
+                                clean_code = code.replace("python", "").replace("```", "").strip()
+                                print(clean_code)
+                                with st.expander("Show Code"):
+                                    st.code(clean_code, language="python")
+                                break
+                        buffer = {}
+                        continue
+                    if line.startswith("id:"):
+                        buffer["id"] = line[len("id:"):].strip()
+                    elif line.startswith("data:"):
+                        buffer["data"] = line[len("data:"):].strip()
+        except Exception as e:
+            st.session_state.chat_history_tab4.append({"sender": "🤖AI Bot", "content": f"❌ API error: {str(e)}"})
+            return
+
+        try:
+            output_buffer = io.StringIO()
+            sys_stdout_backup = sys.stdout
+            sys.stdout = output_buffer
+
+            os.environ["SHOP"] = st.session_state.shop_tab4
+            os.environ["ACCESS_TOKEN"] = st.session_state.token_tab4
+
+            exec_globals = {
+                "__builtins__": __builtins__,
+                "os": os,
+                "requests": requests,
+                "datetime": datetime,
+                "timedelta": timedelta
+            }
+            exec(clean_code, exec_globals)
+
+            sys.stdout = sys_stdout_backup
+            final_output = output_buffer.getvalue().strip()
+
+            if final_output:
+                try:
+                    parsed = json.loads(final_output)
+                except json.JSONDecodeError:
+                    try:
+                        parsed = ast.literal_eval(final_output)
+                    except Exception:
+                        parsed = final_output
+            else:
+                st.session_state.chat_history_tab4.append({"sender": "🤖AI Bot", "content": "❌ Empty output from executed code."})
+                return
+
+            if isinstance(parsed, list):
+                beautified = "\n".join(
+                    f"- **{item.get('title', str(item))}** — ₹{item.get('price', '')}"
+                    if isinstance(item, dict) else f"- {item}"
+                    for item in parsed
+                )
+            elif isinstance(parsed, dict) and all(isinstance(k, str) and isinstance(v, int) for k, v in parsed.items()):
+                sorted_items = sorted(parsed.items(), key=lambda x: x[1], reverse=True)
+                beautified = "\n".join(f"- **{k}** → {v} purchases" for k, v in sorted_items)
+            else:
+                beautified = str(parsed)
+
+            st.session_state.chat_history_tab4.append({"sender": "🤖AI Bot", "content": beautified})
+        except Exception as e:
+            sys.stdout = sys_stdout_backup
+            if 'api_call_tab4' not in st.session_state:
+                st.session_state.api_call_tab4 = 0
+
+            if st.session_state.api_call_tab4 < 3:
+                st.session_state.api_call_tab4 += 1
+                handle_send_tab4()
+                return
+            else:
+                st.session_state.chat_history_tab4.append({
+                    "sender": "🤖AI Bot",
+                    "content": f"❌ Code execution error after 3 retries: {str(e)}"
+                })
+                st.session_state.api_call_tab4 = 0
+
+        st.session_state.input_text_tab4 = ""
+
+    def clear_chat_tab4():
+        st.session_state.chat_history_tab4 = []
+        st.session_state.input_text_tab4 = ""
+        st.session_state.api_call_tab4 = 1
+
+    # === UI Layout ===
+    st.button("🧹 Clear Chat", key="clear_btn_tab4", on_click=clear_chat_tab4)
+    st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab4")
+    st.text_input("🔐 Access Token:", type="password", key="token_tab4")
+
+    for message in st.session_state.chat_history_tab4:
+        st.markdown(f"**{message['sender']}**: {message['content']}")
+
+    st.text_input("🙋You:", key="input_text_tab4", placeholder="Ask about orders, customers, products, etc...")
+    st.button("Send", key="send_btn_tab4", on_click=handle_send_tab4)
