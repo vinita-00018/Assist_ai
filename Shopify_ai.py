@@ -615,11 +615,7 @@ with tab4:
         pd.set_option('display.width', None)
         pd.set_option('display.max_colwidth', None)
         
-        6. Use `tabulate` to print final_output as a table:
-        from tabulate import tabulate
-        print(tabulate(final_output, headers='keys', tablefmt='psql', showindex=False))
-        
-        7. Only return clean, valid Python code. Do not return markdown or explanations. End with:
+        6. Only return clean, valid Python code. Do not return markdown or explanations. End with:
         print(final_output)
 
         User task: {user_query}
