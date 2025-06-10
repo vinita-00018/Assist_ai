@@ -198,8 +198,8 @@ with tab1:
                                 # Replace env vars with actual values
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab1}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab1}"', code)
-                                # clean_code = code.replace("python","").replace("```","").strip()
-                                clean_code = re.sub(r"```(?:python)?|```|Here is the Python code.*?:", "", code).strip()
+                                # clean_code = code.replace("python","").replace("```","").replace("Here is the Python code to fetch customers who have not ordered, adhering to the specified requirements:","").strip()
+                                clean_code = re.sub(r"```(?:python)?|```|Here is .*?:", "", code, flags=re.IGNORECASE).strip()
                                 # st.code(clean_code, language="python")
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
@@ -378,7 +378,7 @@ with tab2:
                                 try:
                                     data_json = data_json.encode('utf-8', 'replace').decode()
                                     data_obj = json.loads(data_json)
-                                    print("Parsed data_obj:", data_obj)
+                                    # print("Parsed data_obj:", data_obj)
 
                                     response_type = data_obj.get("type")
 
@@ -397,7 +397,7 @@ with tab2:
                                     else:
                                         response = "⚠️ Unknown response type."
 
-                                    print("Final response to show:", response)
+                                    # print("Final response to show:", response)
 
                                     st.session_state.chat_history_tab2.append({
                                         "sender": "🤖AI Bot",
@@ -585,8 +585,35 @@ with tab4:
         st.session_state.chat_history_tab4.append({"sender": "🙋You", "content": user_query})
         time.sleep(5)
       
-        question = f"""SHOP = os.getenv("SHOP", "{st.session_state.shop_tab4}")
-        ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "{st.session_state.token_tab4}") You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
+        # question = f"""You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
+        question = f"""
+        You are a Python coding assistant and data scientist. Your job is to analyze Shopify customer/order data using the GraphQL Admin API (version 2024-04) and generate clean, production-ready Python code using pandas, requests, and scikit-learn. Use:
+
+        SHOP = os.getenv('SHOP', '{st.session_state.shop_tab4}')
+        ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}')
+
+        1. Fetch first 250 customers, along with up to 250 orders per customer. Extract: id, email, createdAt, and totalPriceSet.shopMoney.amount.
+
+        2. Use the following helper functions:
+        - fetch_data(query): Sends a GraphQL request and returns JSON.
+        - extract_customer_data(data): Creates a pandas DataFrame with relevant customer/order features.
+
+        3. Based on the user's task/question, decide what to predict:
+
+        - If the task involves **churn**, build a churn prediction model (LogisticRegression) using RFM features.
+        - If the task involves **lifetime value**, use a regression model to predict total value.
+        - If the task asks for **next order prediction**, use regression to predict days until next order.
+        - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
+        - If the task asks for **revenue forecast**, build a time-series forecast using historical order data.
+
+        4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. Use pd.to_datetime(..., utc=True) for all dates.
+
+        5. Only return clean, valid Python code. Do not return markdown or explanations. End with:
+        print(final_output)
+
+        User task: {user_query}
+        """
+
         url = "https://api.indiaagi.ai/test/sse"
         params = {
             "question": question,
@@ -611,7 +638,7 @@ with tab4:
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab4}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab4}"', code)
                                 # clean_code = code.replace("python", "").replace("```", "").strip()
-                                clean_code = re.sub(r"```(?:python)?|```|Here is the Python code.*?:", "", code).strip()
+                                clean_code = re.sub(r"```(?:python)?|```|Here is .*?:", "", code, flags=re.IGNORECASE).strip()
                                 # print(clean_code)
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
