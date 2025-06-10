@@ -608,7 +608,18 @@ with tab4:
 
         4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. Use pd.to_datetime(..., utc=True) for all dates.
 
-        5. Only return clean, valid Python code. Do not return markdown or explanations. End with:
+        5. Before printing final_output, add:
+        import pandas as pd
+        pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', None)
+        pd.set_option('display.max_colwidth', None)
+        
+        6. Use `tabulate` to print final_output as a table:
+        from tabulate import tabulate
+        print(tabulate(final_output, headers='keys', tablefmt='psql', showindex=False))
+        
+        7. Only return clean, valid Python code. Do not return markdown or explanations. End with:
         print(final_output)
 
         User task: {user_query}
