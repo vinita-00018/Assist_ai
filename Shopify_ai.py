@@ -13,10 +13,10 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-# st.set_page_config(page_title="🛍️ Agentic AI for Shopify – Built by Rishabh Shah", layout="wide")
-# st.title("🛍️ Agentic AI for Shopify – Built by Rishabh Shah")
-st.set_page_config(page_title="🛍️", layout="wide")
-st.title("🛍️")
+st.set_page_config(page_title="🛍️ Agentic AI for Shopify – Built by Rishabh Shah", layout="wide")
+st.title("🛍️ Agentic AI for Shopify – Built by Rishabh Shah")
+# st.set_page_config(page_title="🛍️", layout="wide")
+# st.title("🛍️")
 
 tab1, tab2 ,tab3,tab4= st.tabs(["📊 Analytics With Code","🧠 AI Agent Chat","🗣️ Ask Anything (AI)","📈Prediction"])
 
