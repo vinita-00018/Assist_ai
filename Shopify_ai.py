@@ -604,7 +604,7 @@ with tab4:
         - If the task involves **lifetime value**, use a regression model to predict total value.
         - If the task asks for **next order prediction**, use regression to predict days until next order.
         - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
-        - If the task asks for **revenue forecast**, build a time-series forecast using historical order data.
+        - If the task asks for **forecast**, build a time-series forecast using historical order data.
 
         4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. Use pd.to_datetime(..., utc=True) for all dates.
 
