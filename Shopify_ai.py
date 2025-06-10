@@ -203,7 +203,7 @@ with tab1:
                                 # st.code(clean_code, language="python")
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
-                                print(repr(clean_code))
+                                # print(repr(clean_code))
                                 break
                         buffer = {}
                         continue
@@ -610,8 +610,9 @@ with tab4:
                                 code = code.replace("\\n", "\n")
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab4}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab4}"', code)
-                                clean_code = code.replace("python", "").replace("```", "").strip()
-                                print(clean_code)
+                                # clean_code = code.replace("python", "").replace("```", "").strip()
+                                clean_code = re.sub(r"```(?:python)?|```|Here is the Python code.*?:", "", code).strip()
+                                # print(clean_code)
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
                                 break
