@@ -644,9 +644,7 @@ with tab4:
                                 code = code.replace("\\n", "\n")
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab4}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab4}"', code)
-                                # clean_code = code.replace("python", "").replace("```", "").strip()
                                 clean_code = re.sub(r"```(?:python)?|```|Here.*?:", "", code, flags=re.IGNORECASE | re.DOTALL).strip()
-                                # print(clean_code)
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
                                 break
@@ -733,6 +731,21 @@ with tab4:
     st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab4")
     st.text_input("🔐 Access Token:", type="password", key="token_tab4")
 
+    
+    predefined_questions = [
+"Predict Churn rate of next 30 days for all customers",
+"What is the weekly order forecast for the upcoming quarter?",
+"Predict next 30 days of daily order counts using Shopify data",
+"Estimate LTV for Shopify customers based on past purchases.",
+    ]
+
+    cols = st.columns(len(predefined_questions))  # create one column per question
+
+    for idx, question in enumerate(predefined_questions):
+        if cols[idx].button(question):
+            st.session_state.input_text_tab4 = question
+    
+    
     for message in st.session_state.chat_history_tab4:
         st.markdown(f"**{message['sender']}**: {message['content']}")
 
