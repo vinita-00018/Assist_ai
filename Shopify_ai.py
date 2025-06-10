@@ -734,10 +734,11 @@ with tab4:
 
     
     predefined_questions = [
-"Predict Churn rate of next 30 days for all customers",
-"What is the weekly order forecast for the upcoming quarter?",
-"Predict next 30 days of daily order counts using Shopify data",
-"Estimate LTV for Shopify customers based on past purchases.",
+    "Predict Churn rate of next 30 days for all customers",
+    "What is the weekly order forecast for the upcoming quarter?",
+    "Predict next 30 days of daily order counts using Shopify data",
+    "Give me churn prediction using RFM analysis",
+    "Estimate LTV for Shopify customers based on past purchases.",
     ]
 
     cols = st.columns(len(predefined_questions))  # create one column per question
