@@ -199,7 +199,7 @@ with tab1:
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab1}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab1}"', code)
                                 # clean_code = code.replace("python","").replace("```","").replace("Here is the Python code to fetch customers who have not ordered, adhering to the specified requirements:","").strip()
-                                clean_code = re.sub(r"```(?:python)?|```|Here is .*?:", "", code, flags=re.IGNORECASE).strip()
+                                clean_code = re.sub(r"```(?:python)?|```|Here.*?:", "", code, flags=re.IGNORECASE | re.DOTALL).strip()
                                 # st.code(clean_code, language="python")
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
@@ -638,7 +638,7 @@ with tab4:
                                 code = re.sub(r'SHOP\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'SHOP = "{st.session_state.shop_tab4}"', code)
                                 code = re.sub(r'ACCESS_TOKEN\s*=\s*os.getenv\([\'"].+?[\'"]\)', f'ACCESS_TOKEN = "{st.session_state.token_tab4}"', code)
                                 # clean_code = code.replace("python", "").replace("```", "").strip()
-                                clean_code = re.sub(r"```(?:python)?|```|Here is .*?:", "", code, flags=re.IGNORECASE).strip()
+                                clean_code = re.sub(r"```(?:python)?|```|Here.*?:", "", code, flags=re.IGNORECASE | re.DOTALL).strip()
                                 # print(clean_code)
                                 with st.expander("Show Code"):
                                     st.code(clean_code, language="python")
