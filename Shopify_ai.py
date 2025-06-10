@@ -606,7 +606,8 @@ with tab4:
         - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
         - If the task asks for **forecast**, build a time-series forecast using historical order data.
 
-        4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. Use pd.to_datetime(..., utc=True) for all dates.
+        4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. 
+        Always convert all date columns using pd.to_datetime(..., utc=True) and make sure that any datetime used in comparisons (like datetime.now()) is also timezone-aware using tzinfo=timezone.utc to avoid invalid datetime comparisons.
 
         5. Before printing final_output, add:
         import pandas as pd
