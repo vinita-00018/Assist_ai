@@ -53,7 +53,7 @@ with tab1:
 
 
         st.session_state.chat_history_tab1.append({"sender": "🙋You", "content": user_query})
-        time.sleep(5)
+        time.sleep(3)
 
         question = f"""
         SHOP = os.getenv("SHOP", "{st.session_state.shop_tab1}")
@@ -351,7 +351,7 @@ with tab2:
             st.session_state.shop_tab2 += ".myshopify.com"
 
         st.session_state.chat_history_tab2.append({"sender": "🙋You", "content": user_query})
-        time.sleep(5)
+        time.sleep(3)
         
         question = f"""
         Prompt: {user_query}
@@ -583,7 +583,7 @@ with tab4:
             st.session_state.shop_tab4 += ".myshopify.com"
 
         st.session_state.chat_history_tab4.append({"sender": "🙋You", "content": user_query})
-        time.sleep(5)
+        time.sleep(3)
       
         # question = f"""You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
         question = f"""
