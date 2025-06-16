@@ -6,7 +6,8 @@ import os
 import io
 import sys
 import re
-from datetime import datetime, timedelta
+import pandas as pd
+from datetime import datetime, timedelta,timezone
 import ast
 import time
 import urllib3
@@ -586,42 +587,8 @@ with tab4:
         time.sleep(3)
       
         # question = f"""You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
-        # question = f"""
-        # You are a Python coding assistant and data scientist. Your job is to analyze Shopify customer/order data using the GraphQL Admin API (version 2024-04) and generate clean, production-ready Python code using pandas, requests, and scikit-learn. Use:
-
-        # SHOP = os.getenv('SHOP', '{st.session_state.shop_tab4}')
-        # ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}')
-
-        # 1. Fetch first 250 customers, along with up to 250 orders per customer. Extract: id, email, createdAt, and totalPriceSet.shopMoney.amount.
-
-        # 2. Use the following helper functions:
-        # - fetch_data(query): Sends a GraphQL request and returns JSON.
-        # - extract_customer_data(data): Creates a pandas DataFrame with relevant customer/order features.
-
-        # 3. Based on the user's task/question, decide what to predict:
-
-        # - If the task involves **churn**, build a churn prediction model (LogisticRegression) using RFM features.
-        # - If the task involves **lifetime value**, use a regression model to predict total value.
-        # - If the task asks for **next order prediction**, use regression to predict days until next order.
-        # - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
-        # - If the task asks for **forecast**, build a time-series forecast using historical order data.
-
-        # 4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. 
-        # Always convert all date columns using pd.to_datetime(..., utc=True) and make sure that any datetime used in comparisons (like datetime.now()) is also timezone-aware using tzinfo=timezone.utc to avoid invalid datetime comparisons.
-
-        # 5. Before printing final_output, add:
-        # import pandas as pd
-        # pd.set_option('display.max_rows', None)
-        # pd.set_option('display.max_columns', None)
-        # pd.set_option('display.width', None)
-        # pd.set_option('display.max_colwidth', None)
-        
-        # 6. Only return clean, valid Python code. Do not return markdown or explanations. End with:
-        # print(final_output)
-
-        # User task: {user_query}
-        # """
         question = f"""
+        
         You are a Python coding assistant and data scientist. Your job is to analyze Shopify customer/order data using the GraphQL Admin API (version 2024-04) and generate clean, production-ready Python code using pandas, requests, and scikit-learn. Use:
 
         SHOP = os.getenv('SHOP', '{st.session_state.shop_tab4}')
@@ -712,38 +679,56 @@ with tab4:
                 "os": os,
                 "requests": requests,
                 "datetime": datetime,
-                "timedelta": timedelta
+                "timedelta": timedelta,
+                "timezone": timezone,
+                "pd": pd
             }
             exec(clean_code, exec_globals)
 
             sys.stdout = sys_stdout_backup
             final_output = output_buffer.getvalue().strip()
 
+            # Try to parse as DataFrame and convert to markdown table
+            parsed = None
             if final_output:
+                # Try to parse as JSON or Python dict first
                 try:
                     parsed = json.loads(final_output)
-                except json.JSONDecodeError:
+                except Exception:
                     try:
                         parsed = ast.literal_eval(final_output)
                     except Exception:
-                        parsed = final_output
-            else:
-                st.session_state.chat_history_tab4.append({"sender": "🤖AI Bot", "content": "❌ Empty output from executed code."})
-                return
+                        parsed = None
 
-            if isinstance(parsed, list):
-                beautified = "\n".join(
-                    f"- **{item.get('title', str(item))}** — ₹{item.get('price', '')}"
-                    if isinstance(item, dict) else f"- {item}"
-                    for item in parsed
-                )
-            elif isinstance(parsed, dict) and all(isinstance(k, str) and isinstance(v, int) for k, v in parsed.items()):
-                sorted_items = sorted(parsed.items(), key=lambda x: x[1], reverse=True)
-                beautified = "\n".join(f"- **{k}** → {v} purchases" for k, v in sorted_items)
+            if isinstance(parsed, dict) or isinstance(parsed, list):
+                # Pretty-print as JSON in chat bubble
+                pretty_json = json.dumps(parsed, indent=2, ensure_ascii=False)
+                st.session_state.chat_history_tab4.append({
+                    "sender": "🤖AI Bot",
+                    "content": f"Here is your JSON result:\n\n``````"
+                })
             else:
-                beautified = str(parsed)
+                # Try to parse as DataFrame and show as markdown table
+                df = None
+                try:
+                    df = pd.read_csv(io.StringIO(final_output), sep=r"\s{2,}", engine="python")
+                    if len(df.columns) == 1:
+                        df = pd.read_csv(io.StringIO(final_output))
+                except Exception:
+                    df = None
 
-            st.session_state.chat_history_tab4.append({"sender": "🤖AI Bot", "content": beautified})
+                if df is not None and len(df.columns) > 1:
+                    markdown_table = df.to_markdown(index=False)
+                    st.session_state.chat_history_tab4.append({
+                        "sender": "🤖AI Bot",
+                        "content": f"Here is your DataFrame result:\n\n{markdown_table}"
+                    })
+                else:
+                    # Fallback: show as plain text
+                    st.session_state.chat_history_tab4.append({
+                        "sender": "🤖AI Bot",
+                        "content": final_output if final_output else "❌ Empty output from executed code."
+                    })
         except Exception as e:
             sys.stdout = sys_stdout_backup
             if 'api_call_tab4' not in st.session_state:
@@ -772,7 +757,6 @@ with tab4:
     st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab4")
     st.text_input("🔐 Access Token:", type="password", key="token_tab4")
 
-    
     predefined_questions = [
     "Predict Churn rate of next 30 days for all customers",
     "What is the weekly order forecast for the upcoming quarter?",
@@ -793,9 +777,10 @@ with tab4:
         if cols[idx].button(question):
             st.session_state.input_text_tab4 = question
     
-    
+    # for message in st.session_state.chat_history_tab4:
+    #     st.markdown(f"**{message['sender']}**: {message['content']}")
     for message in st.session_state.chat_history_tab4:
-        st.markdown(f"**{message['sender']}**: {message['content']}")
+        st.markdown(f"**{message['sender']}**:\n{message['content']}")
 
     st.text_input("🙋You:", key="input_text_tab4", placeholder="Ask about orders, customers, products, etc...")
     st.button("Send", key="send_btn_tab4", on_click=handle_send_tab4)
