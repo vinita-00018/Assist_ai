@@ -586,13 +586,48 @@ with tab4:
         time.sleep(3)
       
         # question = f"""You are a Python coding assistant. Generate clean Python code to fetch Shopify customer data using GraphQL Admin API 2024-04. Use env vars SHOP=os.getenv('SHOP', '{st.session_state.shop_tab4}') and ACCESS_TOKEN=os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}'). Query first 250 customers and for each, get: id, email, and up to 250 orders with totalPriceSet.shopMoney.amount and createdAt. Implement: fetch_data(query) to call the API with error handling, extract_customer_data(data) to return total_orders, total_spent (sum of totalPrice), days_since_last_order using pd.to_datetime(..., utc=True), train_model(features) using LogisticRegression on ['recency','frequency','monetary_value'] with SimpleImputer and StandardScaler, and predict_churn(model, scaler, features). Define churn_label as 1 if days_since_last_order > 90. Output final_output DataFrame with customer_id, email, churn_probability. Handle missing values, use only stable API fields, avoid pagination. Only output valid Python code, no markdown or explanations. Last line must be: print(final_output). Task: {user_query}"""
+        # question = f"""
+        # You are a Python coding assistant and data scientist. Your job is to analyze Shopify customer/order data using the GraphQL Admin API (version 2024-04) and generate clean, production-ready Python code using pandas, requests, and scikit-learn. Use:
+
+        # SHOP = os.getenv('SHOP', '{st.session_state.shop_tab4}')
+        # ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}')
+
+        # 1. Fetch first 250 customers, along with up to 250 orders per customer. Extract: id, email, createdAt, and totalPriceSet.shopMoney.amount.
+
+        # 2. Use the following helper functions:
+        # - fetch_data(query): Sends a GraphQL request and returns JSON.
+        # - extract_customer_data(data): Creates a pandas DataFrame with relevant customer/order features.
+
+        # 3. Based on the user's task/question, decide what to predict:
+
+        # - If the task involves **churn**, build a churn prediction model (LogisticRegression) using RFM features.
+        # - If the task involves **lifetime value**, use a regression model to predict total value.
+        # - If the task asks for **next order prediction**, use regression to predict days until next order.
+        # - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
+        # - If the task asks for **forecast**, build a time-series forecast using historical order data.
+
+        # 4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. 
+        # Always convert all date columns using pd.to_datetime(..., utc=True) and make sure that any datetime used in comparisons (like datetime.now()) is also timezone-aware using tzinfo=timezone.utc to avoid invalid datetime comparisons.
+
+        # 5. Before printing final_output, add:
+        # import pandas as pd
+        # pd.set_option('display.max_rows', None)
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.width', None)
+        # pd.set_option('display.max_colwidth', None)
+        
+        # 6. Only return clean, valid Python code. Do not return markdown or explanations. End with:
+        # print(final_output)
+
+        # User task: {user_query}
+        # """
         question = f"""
         You are a Python coding assistant and data scientist. Your job is to analyze Shopify customer/order data using the GraphQL Admin API (version 2024-04) and generate clean, production-ready Python code using pandas, requests, and scikit-learn. Use:
 
         SHOP = os.getenv('SHOP', '{st.session_state.shop_tab4}')
         ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '{st.session_state.token_tab4}')
 
-        1. Fetch first 250 customers, along with up to 250 orders per customer. Extract: id, email, createdAt, and totalPriceSet.shopMoney.amount.
+        1. Fetch first 50 customers, along with up to 50 orders per customer. Extract: id, email, createdAt, and totalPriceSet.shopMoney.amount.
 
         2. Use the following helper functions:
         - fetch_data(query): Sends a GraphQL request and returns JSON.
@@ -605,24 +640,29 @@ with tab4:
         - If the task asks for **next order prediction**, use regression to predict days until next order.
         - If the task asks for **product recommendations**, suggest products based on past purchases (collaborative filtering or content-based).
         - If the task asks for **forecast**, build a time-series forecast using historical order data.
+        - If the task involves **repeat purchase rate**, calculate the rate of repeat purchases for highly selling product types.
+        - If the task involves **sales trends**, analyze sales data to identify top-selling products over a specified period.
 
         4. Handle missing data with SimpleImputer. Scale numeric features with StandardScaler. 
         Always convert all date columns using pd.to_datetime(..., utc=True) and make sure that any datetime used in comparisons (like datetime.now()) is also timezone-aware using tzinfo=timezone.utc to avoid invalid datetime comparisons.
 
-        5. Before printing final_output, add:
+        5. When extracting data, check for `None` before accessing attributes of objects. For example, when accessing product information, ensure that the product exists before trying to get its ID.
+        
+        6. Before printing final_output, add:
         import pandas as pd
         pd.set_option('display.max_rows', None)
         pd.set_option('display.max_columns', None)
         pd.set_option('display.width', None)
         pd.set_option('display.max_colwidth', None)
         
-        6. Only return clean, valid Python code. Do not return markdown or explanations. End with:
+        7. Only return clean, valid Python code. Do not return markdown or explanations. End with:
         print(final_output)
 
         User task: {user_query}
         """
-
+        
         url = "https://api.indiaagi.ai/test/sse"
+        
         params = {
             "question": question,
             "rounds": 1,
@@ -738,8 +778,13 @@ with tab4:
     "What is the weekly order forecast for the upcoming quarter?",
     "Predict next 30 days of daily order counts using Shopify data",
     "Give me churn prediction using RFM analysis",
-    "Product Recommendations",
     "Estimate LTV for Shopify customers based on past purchases.",
+    "Calculate The store's average customer lifetime value.",
+    "Calculate highest selling product with quantity",
+    "What products should I recommend to customers based on their previous purchases?",
+    "What trends can you find in my sales data that could inform my marketing strategy?",
+    "How can I calculate the repeat purchase rate for my top-selling products?",
+    "Calculate top 10 best selling product based on purchase history ?"
     ]
 
     cols = st.columns(len(predefined_questions))  # create one column per question
