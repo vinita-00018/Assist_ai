@@ -72,8 +72,8 @@ with tab1:
         - Always use the **latest valid Shopify Admin API version (2024-04)**.
         - **Avoid deprecated fields or endpoints**. If a GraphQL field or REST endpoint has been removed, skip or replace it with a supported alternative.
         - When uncertain about field availability in GraphQL, **prefer REST** if the data is critical and available there.
+        - When extracting data, check for `None` before accessing attributes of objects. For example, when accessing product information, ensure that the product exists before trying to get its ID.
 
-        
         #########################
         # === CUSTOM SCENARIOS ===
         #########################
