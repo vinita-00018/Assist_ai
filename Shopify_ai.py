@@ -31,10 +31,14 @@ with tab1:
         st.session_state.input_text = ""
     if "api_call" not in st.session_state:
         st.session_state.api_call = 1
+    # if "shop_tab1" not in st.session_state:
+    #     st.session_state.shop_tab1 = ""
+    # if "token_tab1" not in st.session_state:
+    #     st.session_state.token_tab1 = ""
     if "shop_tab1" not in st.session_state:
-        st.session_state.shop_tab1 = ""
+        st.session_state.shop_tab1 = "qetest1.myshopify.com"  # ✅ Default value here
     if "token_tab1" not in st.session_state:
-        st.session_state.token_tab1 = ""
+        st.session_state.token_tab1 = "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"  # ✅ Default value here
 
     # === Function: Call AI Agent and Execute Shopify Code ===
     def handle_send_tab1():
@@ -48,10 +52,10 @@ with tab1:
                 "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
             })
             return
-        # 🔐 Ensure valid domain
+       
+    
         if not st.session_state.shop_tab1.endswith(".myshopify.com"):
             st.session_state.shop_tab1 += ".myshopify.com"
-
 
         st.session_state.chat_history_tab1.append({"sender": "🙋You", "content": user_query})
         time.sleep(3)
@@ -299,10 +303,19 @@ with tab1:
     # === UI Layout ===
     # Manual SHOP + TOKEN inputs
     st.button("🧹 Clear Chat", key="clear_btn_tab1", on_click=clear_chat_tab1)
-    st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab1")
-    st.text_input("🔐 Access Token:", type="password", key="token_tab1")
+    st.text_input(
+    "🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):",
+    key="shop_tab1",
+    value=st.session_state.shop_tab1
+    )
 
-    
+    st.text_input(
+        "🔐 Access Token:",
+        type="password",
+        key="token_tab1",
+        value=st.session_state.token_tab1
+    )
+
     predefined_questions = [
     "Show customers who have not ordered",
     "What is the store's churn rate?",
@@ -333,21 +346,31 @@ with tab2:
         st.session_state.chat_history_tab2 = []
     if "input_text_tab2" not in st.session_state:
         st.session_state.input_text_tab2 = ""
+    # if "shop_tab2" not in st.session_state:
+    #     st.session_state.shop_tab2 = ""
+    # if "token_tab2" not in st.session_state:
+    #     st.session_state.token_tab2 = ""
     if "shop_tab2" not in st.session_state:
-        st.session_state.shop_tab2 = ""
+        st.session_state.shop_tab2 = "qetest1.myshopify.com"
     if "token_tab2" not in st.session_state:
-        st.session_state.token_tab2 = ""
+        st.session_state.token_tab2 = "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"
+
 
     def handle_send_tab2():
         user_query = st.session_state.input_text_tab2.strip()
         if not user_query:
             return
-        if not st.session_state.shop_tab2 or not st.session_state.token_tab2:
-            st.session_state.chat_history_tab2.append({
-                "sender": "🤖AI Bot",
-                "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
-            })
-            return
+        # if not st.session_state.shop_tab2 or not st.session_state.token_tab2:
+        #     st.session_state.chat_history_tab2.append({
+        #         "sender": "🤖AI Bot",
+        #         "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
+        #     })
+        #     return
+        if not st.session_state.get("shop_tab2"):
+            st.session_state.shop_tab2 = "qetest1.myshopify.com"
+        if not st.session_state.get("token_tab2"):
+            st.session_state.token_tab2 = "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"
+        
         if not st.session_state.shop_tab2.endswith(".myshopify.com"):
             st.session_state.shop_tab2 += ".myshopify.com"
 
@@ -429,10 +452,20 @@ with tab2:
 
     st.button("🧹 Clear Chat", key="clear_btn_tab2", on_click=clear_chat_tab2)
     # Unique keys here to avoid conflict with tab1
-    st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab2")
-    st.text_input("🔐 Access Token:", type="password", key="token_tab2")
-    
-    
+    # st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab2")
+    # st.text_input("🔐 Access Token:", type="password", key="token_tab2")
+    st.text_input(
+    "🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):",
+    key="shop_tab2",
+    value=st.session_state.shop_tab2
+    )
+    st.text_input(
+        "🔐 Access Token:",
+        type="password",
+        key="token_tab2",
+        value=st.session_state.token_tab2
+    )
+
     predefined_questions = [
     "What is our total revenue this month?",
     "What is our average order value (AOV)?",
@@ -565,21 +598,30 @@ with tab4:
         st.session_state.input_text_tab4 = ""
     if "api_call_tab4" not in st.session_state:
         st.session_state.api_call_tab4 = 1
+    # if "shop_tab4" not in st.session_state:
+    #     st.session_state.shop_tab4 = ""
+    # if "token_tab4" not in st.session_state:
+    #     st.session_state.token_tab4 = ""
     if "shop_tab4" not in st.session_state:
-        st.session_state.shop_tab4 = ""
+        st.session_state.shop_tab4 = "qetest1.myshopify.com"  # ✅ Default store
     if "token_tab4" not in st.session_state:
-        st.session_state.token_tab4 = ""
+        st.session_state.token_tab4 = "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"  # ✅ Default token
 
     def handle_send_tab4():
         user_query = st.session_state.input_text_tab4.strip()
         if not user_query:
             return
-        if not st.session_state.shop_tab4 or not st.session_state.token_tab4:
-            st.session_state.chat_history_tab4.append({
-                "sender": "🤖AI Bot",
-                "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
-            })
-            return
+        # if not st.session_state.shop_tab4 or not st.session_state.token_tab4:
+        #     st.session_state.chat_history_tab4.append({
+        #         "sender": "🤖AI Bot",
+        #         "content": "⚠️ Please enter both SHOP and ACCESS_TOKEN above."
+        #     })
+        #     return
+        if not st.session_state.get("shop_tab4"):
+            st.session_state.shop_tab4 = "qetest1.myshopify.com"
+        if not st.session_state.get("token_tab4"):
+            st.session_state.token_tab4 = "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"
+        
         if not st.session_state.shop_tab4.endswith(".myshopify.com"):
             st.session_state.shop_tab4 += ".myshopify.com"
 
@@ -754,8 +796,20 @@ with tab4:
 
     # === UI Layout ===
     st.button("🧹 Clear Chat", key="clear_btn_tab4", on_click=clear_chat_tab4)
-    st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab4")
-    st.text_input("🔐 Access Token:", type="password", key="token_tab4")
+    # st.text_input("🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):", key="shop_tab4")
+    # st.text_input("🔐 Access Token:", type="password", key="token_tab4")
+    st.text_input(
+    "🛒 Shopify Store Name (e.g., qeapptest.myshopify.com):",
+    key="shop_tab4",
+    value=st.session_state.shop_tab4
+    )
+
+    st.text_input(
+        "🔐 Access Token:",
+        type="password",
+        key="token_tab4",
+        value=st.session_state.token_tab4
+    )
 
     predefined_questions = [
     "Predict Churn rate of next 30 days for all customers",
