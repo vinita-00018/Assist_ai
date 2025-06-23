@@ -761,7 +761,6 @@ with tab4:
     "Predict Churn rate of next 30 days for all customers",
     "What is the weekly order forecast for the upcoming quarter?",
     "Predict next 30 days of daily order counts using Shopify data",
-    "Give me churn prediction using RFM analysis",
     "Estimate LTV for Shopify customers based on past purchases.",
     "Calculate The store's average customer lifetime value.",
     "Calculate highest selling product with quantity",
